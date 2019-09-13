@@ -1,0 +1,14 @@
+template(name="editor")
+  textarea.editor(
+    dir="auto"
+    class="{{class}}"
+    id=id
+    autofocus=autofocus
+    placeholder="{{_ 'comment-placeholder'}}")
+    +Template.contentBlock
+
+template(name="viewer")
+  .viewer(dir="auto")
+    +mentions
+      +markdown
+        {{> UI.contentBlock }}

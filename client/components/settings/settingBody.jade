@@ -1,0 +1,190 @@
+template(name="setting")
+  .setting-content
+    unless currentUser.isAdmin
+      | {{_ 'error-notAuthorized'}}
+    else
+      .content-title
+        span {{_ 'settings'}}
+      .content-body
+        .side-menu
+          ul
+            li.active
+              a.js-setting-menu(data-id="registration-setting") {{_ 'registration'}}
+            li
+              a.js-setting-menu(data-id="email-setting") {{_ 'email'}}
+            li
+              a.js-setting-menu(data-id="account-setting") {{_ 'accounts'}}
+            li
+              a.js-setting-menu(data-id="announcement-setting") {{_ 'admin-announcement'}}
+            li
+              a.js-setting-menu(data-id="layout-setting") {{_ 'layout'}}
+            li
+              a.js-setting-menu(data-id="webhook-setting") {{_ 'global-webhook'}}
+        .main-body
+          if loading.get
+            +spinner
+          else if generalSetting.get
+            +general
+          else if emailSetting.get
+            +email
+          else if accountSetting.get
+            +accountSettings
+          else if announcementSetting.get
+            +announcementSettings
+          else if layoutSetting.get
+            +layoutSettings
+          else if webhookSetting.get
+            +webhookSettings
+
+template(name="webhookSettings")
+  span
+     +outgoingWebhooksPopup
+
+template(name="general")
+  ul#registration-setting.setting-detail
+    li
+      a.flex.js-toggle-registration
+        .materialCheckBox(class="{{#if currentSetting.disableRegistration}}is-checked{{/if}}")
+
+        span {{_ 'disable-self-registration'}}
+    li
+      .invite-people(class="{{#if currentSetting.disableRegistration}}{{else}}hide{{/if}}")
+        ul
+          li
+            .title {{_ 'invite-people'}}
+            textarea#email-to-invite.wekan-form-control(rows='5', placeholder="{{_ 'email-addresses'}}")
+          li
+            .title {{_ 'to-boards'}}
+            .bg-white
+              each boards
+                a.option.flex.js-toggle-board-choose(id= _id)
+                  .materialCheckBox(data-id= _id)
+
+                  span= title
+
+          li
+            button.js-email-invite.primary {{_ 'invite'}}
+
+template(name='email')
+  ul#email-setting.setting-detail
+    li.smtp-form
+      .title {{_ 'smtp-host'}}
+      .description {{_ 'smtp-host-description'}}
+      .form-group
+        input.wekan-form-control#mail-server-host(type="text", placeholder="smtp.domain.com" value="{{currentSetting.mailServer.host}}")
+    li.smtp-form
+      .title {{_ 'smtp-port'}}
+      .description {{_ 'smtp-port-description'}}
+      .form-group
+        input.wekan-form-control#mail-server-port(type="text", placeholder="25" value="{{currentSetting.mailServer.port}}")
+    li.smtp-form
+      .title {{_ 'smtp-username'}}
+      .form-group
+        input.wekan-form-control#mail-server-username(type="text", placeholder="{{_ 'username'}}" value="{{currentSetting.mailServer.username}}")
+    li.smtp-form
+      .title {{_ 'smtp-password'}}
+      .form-group
+        input.wekan-form-control#mail-server-password(type="password", placeholder="{{_ 'password'}}" value="{{currentSetting.mailServer.password}}")
+    li.smtp-form
+      .title {{_ 'smtp-tls'}}
+      .form-group
+        a.flex.js-toggle-tls
+          .materialCheckBox#mail-server-tls(class="{{#if currentSetting.mailServer.enableTLS}}is-checked{{/if}}")
+
+          span {{_ 'smtp-tls-description'}}
+
+    li.smtp-form
+      .title {{_ 'send-from'}}
+      .form-group
+        input.wekan-form-control#mail-server-from(type="email", placeholder="no-reply@domain.com" value="{{currentSetting.mailServer.from}}")
+
+    li
+      button.js-save.primary {{_ 'save'}}
+
+    li
+      button.js-send-smtp-test-email.primary {{_ 'send-smtp-test'}}
+
+template(name='accountSettings')
+  ul#account-setting.setting-detail
+    li.accounts-form
+      .title {{_ 'accounts-allowEmailChange'}}
+      .form-group.flex
+        input.wekan-form-control#accounts-allowEmailChange(type="radio" name="allowEmailChange" value="true" checked="{{#if allowEmailChange}}checked{{/if}}")
+        span {{_ 'yes'}}
+        input.wekan-form-control#accounts-allowEmailChange(type="radio" name="allowEmailChange" value="false" checked="{{#unless allowEmailChange}}checked{{/unless}}")
+        span {{_ 'no'}}
+    li
+    li.accounts-form
+      .title {{_ 'accounts-allowUserNameChange'}}
+      .form-group.flex
+        input.wekan-form-control#accounts-allowUserNameChange(type="radio" name="allowUserNameChange" value="true" checked="{{#if allowUserNameChange}}checked{{/if}}")
+        span {{_ 'yes'}}
+        input.wekan-form-control#accounts-allowUserNameChange(type="radio" name="allowUserNameChange" value="false" checked="{{#unless allowUserNameChange}}checked{{/unless}}")
+        span {{_ 'no'}}
+    li
+    li.accounts-form
+      .title {{_ 'accounts-allowUserDelete'}}
+      .form-group.flex
+        input.wekan-form-control#accounts-allowUserDelete(type="radio" name="allowUserDelete" value="true" checked="{{#if allowUserDelete}}checked{{/if}}")
+        span {{_ 'yes'}}
+        input.wekan-form-control#accounts-allowUserDelete(type="radio" name="allowUserDelete" value="false" checked="{{#unless allowUserDelete}}checked{{/unless}}")
+        span {{_ 'no'}}
+    li
+      button.js-accounts-save.primary {{_ 'save'}}
+
+template(name='announcementSettings')
+  ul#announcement-setting.setting-detail
+    li
+      a.flex.js-toggle-activemessage
+        .materialCheckBox(class="{{#if currentSetting.enabled}}is-checked{{/if}}")
+
+        span {{_ 'admin-announcement-active'}}
+    li
+      .admin-announcement(class="{{#if currentSetting.enabled}}{{else}}hide{{/if}}")
+        ul
+          li
+            .title {{_ 'admin-announcement-title'}}
+            textarea#admin-announcement.wekan-form-control= currentSetting.body
+          li
+            button.js-announcement-save.primary {{_ 'save'}}
+
+template(name='layoutSettings')
+  ul#layout-setting.setting-detail
+    //li.layout-form
+      .title {{_ 'hide-logo'}}
+      .form-group.flex
+        input.wekan-form-control#hide-logo(type="radio" name="hideLogo" value="true" checked="{{#if currentSetting.hideLogo}}checked{{/if}}")
+        span {{_ 'yes'}}
+        input.wekan-form-control#hide-logo(type="radio" name="hideLogo" value="false" checked="{{#unless currentSetting.hideLogo}}checked{{/unless}}")
+        span {{_ 'no'}}
+    li.layout-form
+      .title {{_ 'display-authentication-method'}}
+      .form-group.flex
+        input.wekan-form-control#display-authentication-method(type="radio" name="displayAuthenticationMethod" value="true" checked="{{#if currentSetting.displayAuthenticationMethod}}checked{{/if}}")
+        span {{_ 'yes'}}
+        input.wekan-form-control#display-authentication-method(type="radio" name="displayAuthenticationMethod" value="false" checked="{{#unless currentSetting.displayAuthenticationMethod}}checked{{/unless}}")
+        span {{_ 'no'}}
+    li.layout-form
+      .title {{_ 'default-authentication-method'}}
+      +selectAuthenticationMethod(authenticationMethod=currentSetting.defaultAuthenticationMethod)
+    li.layout-form
+      .title {{_ 'custom-product-name'}}
+      .form-group
+        input.wekan-form-control#product-name(type="text", placeholder="" value="{{currentSetting.productName}}")
+    li.layout-form
+      .title {{_ 'add-custom-html-after-body-start'}}
+      textarea#customHTMLafterBodyStart.wekan-form-control= currentSetting.customHTMLafterBodyStart
+    li.layout-form
+      .title {{_ 'add-custom-html-before-body-end'}}
+      textarea#customHTMLbeforeBodyEnd.wekan-form-control= currentSetting.customHTMLbeforeBodyEnd
+    li
+      button.js-save-layout.primary {{_ 'save'}}
+
+
+template(name='selectAuthenticationMethod')
+  select#defaultAuthenticationMethod
+    each authentications
+      if isSelected value
+        option(value="{{value}}" selected) {{_ value}}
+      else
+        option(value="{{value}}") {{_ value}}
